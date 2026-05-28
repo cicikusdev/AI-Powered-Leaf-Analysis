@@ -10,37 +10,41 @@ function AnalysisResult({ result, loading, previewImage }) {
   const { t, language } = useLanguage()
   const resultRef = useRef(null)
 
-const handleSavePDF = async () => {
-  if (!result) return
-  try {
-    const element = resultRef.current
-    const canvas = await html2canvas(element, {
-  scale: 2,
-  useCORS: true,
-  backgroundColor: '#ffffff',
-  logging: false,
-  width: element.offsetWidth,
-  windowWidth: 1200,
-})
-    const imgData = canvas.toDataURL('image/png')
-    const pdf = new jsPDF('p', 'mm', [210, 350])
-    const pdfWidth = pdf.internal.pageSize.getWidth()
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+  const handleSavePDF = async () => {
+    if (!result) return
+    try {
+      const element = resultRef.current
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: element.offsetWidth,
+        windowWidth: 1200,
+        imageTimeout: 0,
+        allowTaint: true,
+      })
 
-    pdf.setFontSize(16)
-    pdf.setTextColor(22, 163, 74)
-    pdf.text('LeafScan - Analiz Sonucu', 14, 16)
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF('p', 'mm', [210, 350])
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width
 
-    pdf.setFontSize(10)
-    pdf.setTextColor(100, 116, 139)
-    pdf.text(`Tarih: ${new Date().toLocaleString('tr-TR')}`, 14, 24)
+      pdf.setFontSize(16)
+      pdf.setTextColor(22, 163, 74)
+      pdf.text('LeafScan - Analiz Sonucu', 14, 16)
 
-    pdf.addImage(imgData, 'PNG', 14, 30, pdfWidth - 28, Math.min(pdfHeight, 200))
-    pdf.save(`leafscan-analiz-${Date.now()}.pdf`)
-  } catch (err) {
-    console.error('PDF hatası:', err)
+      pdf.setFontSize(10)
+      pdf.setTextColor(100, 116, 139)
+      pdf.text(`Tarih: ${new Date().toLocaleString('tr-TR')}`, 14, 24)
+
+      pdf.addImage(imgData, 'PNG', 14, 30, pdfWidth - 28, Math.min(pdfHeight, 280))
+      pdf.save(`leafscan-analiz-${Date.now()}.pdf`)
+    } catch (err) {
+      console.error('PDF hatası:', err)
+    }
   }
-}
+
   const handlePrint = () => {
     window.print()
   }
@@ -96,7 +100,6 @@ const handleSavePDF = async () => {
             : '1.5px solid rgba(239,68,68,0.2)',
         }}
       >
-        {/* PDF için ref alan — görsel + sonuç */}
         <div ref={resultRef}>
           {/* Yüklenen görsel */}
           {previewImage && (
@@ -104,6 +107,7 @@ const handleSavePDF = async () => {
               <img
                 src={previewImage}
                 alt="Analiz edilen yaprak"
+                crossOrigin="anonymous"
                 style={{ width: '100%', height: '200px', objectFit: 'cover', display: 'block' }}
               />
             </div>
@@ -115,7 +119,6 @@ const handleSavePDF = async () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            {/* Durum Badge */}
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -132,13 +135,11 @@ const handleSavePDF = async () => {
               )}
             </motion.div>
 
-            {/* Bitki */}
             <div className="result-detail-row">
               <span className="result-detail-label">{t('plant_label')}</span>
               <span className="result-detail-value">🌱 {language === 'en' ? result.plant_en : result.plant || '—'}</span>
             </div>
 
-            {/* Hastalık */}
             {!result.is_healthy && (
               <motion.div
                 className="result-detail-row"
@@ -154,15 +155,12 @@ const handleSavePDF = async () => {
               </motion.div>
             )}
 
-            {/* Güven */}
             <ConfidenceBar confidence={result.confidence} />
 
-            {/* Top Tahminler */}
             {result.top_predictions?.length > 0 && (
               <TopPredictions predictions={result.top_predictions} />
             )}
 
-            {/* Açıklama */}
             {result.description && (
               <motion.div
                 className="info-card"
@@ -175,7 +173,6 @@ const handleSavePDF = async () => {
               </motion.div>
             )}
 
-            {/* Öneri */}
             {!result.is_healthy && result.recommendation && (
               <motion.div
                 className="info-card recommendation"
@@ -190,7 +187,6 @@ const handleSavePDF = async () => {
           </motion.div>
         </div>
 
-        {/* Butonlar — PDF dışında */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
