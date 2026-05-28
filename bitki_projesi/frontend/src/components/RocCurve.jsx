@@ -49,7 +49,16 @@ function RocCurve({ rocData }) {
             formatter={(value, name) => [`${(value * 100).toFixed(2)}%`, name]}
             labelFormatter={() => 'FPR'}
           />
-          <Legend wrapperStyle={{ paddingTop: '20px' }} />
+          <Legend 
+  wrapperStyle={{ 
+    paddingTop: '16px', 
+    fontSize: '0.72rem',
+    lineHeight: '1.6'
+  }} 
+  layout="horizontal"
+  verticalAlign="bottom"
+  align="center"
+/>
           
           {selectedClasses.map((clsIdx, i) => (
             <Line 
