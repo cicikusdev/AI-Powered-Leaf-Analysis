@@ -22,7 +22,7 @@ const handleSavePDF = async () => {
     })
 
     const imgData = canvas.toDataURL('image/png')
-    const pdf = new jsPDF('p', 'mm', 'a4')
+    const pdf = new jsPDF('p', 'mm', [210, 350])
     const pdfWidth = pdf.internal.pageSize.getWidth()
     const pdfHeight = (canvas.height * pdfWidth) / canvas.width
 
