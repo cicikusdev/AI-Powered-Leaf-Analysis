@@ -15,7 +15,7 @@ function MetricsPage() {
   const [metricsData, setMetricsData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [selectedModel, setSelectedModel] = useState('best_model_v4')
+  const [selectedModel, setSelectedModel] = useState('best_model_v6')
 
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -25,6 +25,13 @@ function MetricsPage() {
           setError(data.message)
         } else {
           setMetricsData(data)
+          // Mevcut modeli otomatik seç
+          if (data.models) {
+            const models = Object.keys(data.models)
+            if (models.length > 0 && !models.includes('best_model_v6')) {
+              setSelectedModel(models[models.length - 1])
+            }
+          }
         }
       } catch (err) {
         console.error('Error fetching metrics:', err)
@@ -65,7 +72,9 @@ function MetricsPage() {
   if (!metricsData || !metricsData.models) return null
 
   const availableModels = Object.keys(metricsData.models)
-  const currentMetrics = metricsData.models[selectedModel]
+  const currentMetrics = metricsData.models[selectedModel] || metricsData.models[availableModels[0]]
+
+  if (!currentMetrics) return null
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -123,13 +132,15 @@ function MetricsPage() {
         <ModelComparison allModels={metricsData.models} />
       </motion.div>
 
-      <motion.div variants={itemVariants} className="mb-8 chart-container glass-panel">
-        <div className="chart-header">
-          <h3 className="chart-title">{t('chart_training_history')}</h3>
-          <p className="chart-desc">{t('chart_th_desc')}</p>
-        </div>
-        <TrainingChart trainingHistory={currentMetrics.training_history} />
-      </motion.div>
+      {currentMetrics.training_history && (
+        <motion.div variants={itemVariants} className="mb-8 chart-container glass-panel">
+          <div className="chart-header">
+            <h3 className="chart-title">{t('chart_training_history')}</h3>
+            <p className="chart-desc">{t('chart_th_desc')}</p>
+          </div>
+          <TrainingChart trainingHistory={currentMetrics.training_history} />
+        </motion.div>
+      )}
 
       <div className="metrics-grid-2col mb-8">
         <motion.div variants={itemVariants} className="chart-container glass-panel">
