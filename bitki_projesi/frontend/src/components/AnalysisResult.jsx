@@ -3,6 +3,8 @@ import { useRef } from 'react'
 import ConfidenceBar from './ConfidenceBar'
 import TopPredictions from './TopPredictions'
 import { useLanguage } from '../context/LanguageContext'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 
 function AnalysisResult({ result, loading, previewImage }) {
   const { t, language } = useLanguage()
@@ -11,8 +13,7 @@ function AnalysisResult({ result, loading, previewImage }) {
   const handleSavePDF = async () => {
     if (!result) return
     try {
-      const { default: html2canvas } = await import('html2canvas')
-      const { default: jsPDF } = await import('jspdf')
+      
 
       const element = resultRef.current
       const canvas = await html2canvas(element, {
