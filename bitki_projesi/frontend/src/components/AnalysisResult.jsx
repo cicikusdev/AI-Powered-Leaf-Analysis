@@ -10,58 +10,36 @@ function AnalysisResult({ result, loading, previewImage }) {
   const { t, language } = useLanguage()
   const resultRef = useRef(null)
 
-  const handleSavePDF = async () => {
-    if (!result) return
-    try {
-      
+const handleSavePDF = async () => {
+  if (!result) return
+  try {
+    const element = resultRef.current
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+    })
 
-      const element = resultRef.current
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-      })
+    const imgData = canvas.toDataURL('image/png')
+    const pdf = new jsPDF('p', 'mm', 'a4')
+    const pdfWidth = pdf.internal.pageSize.getWidth()
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width
 
-      const imgData = canvas.toDataURL('image/png')
-      const pdf = new jsPDF('p', 'mm', 'a4')
-      const pdfWidth = pdf.internal.pageSize.getWidth()
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+    pdf.setFontSize(16)
+    pdf.setTextColor(22, 163, 74)
+    pdf.text('LeafScan - Analiz Sonucu', 14, 16)
 
-      // Başlık
-      pdf.setFontSize(18)
-      pdf.setTextColor(22, 163, 74)
-      pdf.text('🌿 LeafScan - Analiz Sonucu', 14, 20)
+    pdf.setFontSize(10)
+    pdf.setTextColor(100, 116, 139)
+    pdf.text(`Tarih: ${new Date().toLocaleString('tr-TR')}`, 14, 24)
 
-      pdf.setFontSize(10)
-      pdf.setTextColor(100, 116, 139)
-      pdf.text(`Tarih: ${new Date().toLocaleString('tr-TR')}`, 14, 28)
-
-      // Görsel varsa ekle
-      if (previewImage) {
-        try {
-          pdf.addImage(previewImage, 'JPEG', 14, 35, 60, 50)
-        } catch (e) {}
-      }
-
-      // Sonuç kartı
-      pdf.addImage(imgData, 'PNG', 14, previewImage ? 92 : 35, pdfWidth - 28, Math.min(pdfHeight, 180))
-
-      pdf.save(`leafscan-analiz-${Date.now()}.pdf`)
-    } catch (err) {
-      console.error('PDF hatası:', err)
-      // Fallback: txt kaydet
-      const content = `LeafScan - Analiz Sonucu\n========================\nBitki: ${result.plant || result.plant_en}\nDurum: ${result.is_healthy ? 'Sağlıklı' : 'Hastalık'}\nModel Güveni: %${result.confidence?.toFixed(1)}\n${result.description ? `\nAçıklama: ${result.description}` : ''}\nTarih: ${new Date().toLocaleString('tr-TR')}`
-      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `leafscan-analiz-${Date.now()}.txt`
-      a.click()
-      URL.revokeObjectURL(url)
-    }
+    pdf.addImage(imgData, 'PNG', 14, 30, pdfWidth - 28, Math.min(pdfHeight, 200))
+    pdf.save(`leafscan-analiz-${Date.now()}.pdf`)
+  } catch (err) {
+    console.error('PDF hatası:', err)
   }
-
+}
   const handlePrint = () => {
     window.print()
   }
