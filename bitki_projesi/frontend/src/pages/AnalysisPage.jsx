@@ -21,6 +21,7 @@ const DECO_POSITIONS = [
 function AnalysisPage() {
   const { t } = useLanguage()
   const [selectedImage, setSelectedImage] = useState(null)
+  const [previewImage, setPreviewImage] = useState(null)
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -30,7 +31,15 @@ function AnalysisPage() {
     setSelectedImage(file)
     setResult(null)
     setError(null)
-    if (!file) return
+
+    if (!file) {
+      setPreviewImage(null)
+      return
+    }
+
+    // Preview URL oluştur
+    const preview = URL.createObjectURL(file)
+    setPreviewImage(preview)
 
     setLoading(true)
     try {
@@ -38,7 +47,6 @@ function AnalysisPage() {
       setResult(data)
 
       // Geçmişe ekle
-      const preview = URL.createObjectURL(file)
       setHistory(prev => [{
         id: Date.now(),
         preview,
@@ -84,7 +92,6 @@ function AnalysisPage() {
             userSelect: 'none',
             zIndex: 0,
             filter: 'blur(0.5px)',
-            animation: `deco-float-${i % 3} ${5 + i}s ease-in-out infinite`,
           }}
         >
           {DECO_ICONS[i % DECO_ICONS.length]}
@@ -109,17 +116,13 @@ function AnalysisPage() {
 
             {error && (
               <motion.div
-                className="error-message"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 style={{
-                  marginTop: '16px',
-                  padding: '16px',
+                  marginTop: '16px', padding: '16px',
                   background: 'rgba(239,68,68,0.06)',
                   border: '1px solid rgba(239,68,68,0.2)',
-                  borderRadius: '12px',
-                  color: '#dc2626',
-                  fontSize: '0.875rem'
+                  borderRadius: '12px', color: '#dc2626', fontSize: '0.875rem'
                 }}
               >
                 <strong>{t('error_title')}</strong> {error}
@@ -128,7 +131,11 @@ function AnalysisPage() {
           </div>
 
           <div className="analysis-column right-column">
-            <AnalysisResult result={result} loading={loading} />
+            <AnalysisResult
+              result={result}
+              loading={loading}
+              previewImage={previewImage}
+            />
           </div>
         </div>
 
@@ -141,13 +148,9 @@ function AnalysisPage() {
             style={{ marginTop: '48px' }}
           >
             <h2 style={{
-              fontSize: '1.1rem',
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              marginBottom: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
+              fontSize: '1.1rem', fontWeight: 700,
+              color: 'var(--text-primary)', marginBottom: '16px',
+              display: 'flex', alignItems: 'center', gap: '8px'
             }}>
               🕐 Son Analizler
             </h2>
@@ -162,33 +165,21 @@ function AnalysisPage() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.08 }}
+                  whileHover={{ translateY: -4, boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}
                   style={{
-                    background: 'white',
-                    borderRadius: '16px',
+                    background: 'white', borderRadius: '16px',
                     overflow: 'hidden',
                     border: `1px solid ${item.isHealthy ? 'rgba(22,163,74,0.15)' : 'rgba(239,68,68,0.15)'}`,
                     boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
-                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                    cursor: 'pointer',
                   }}
-                  whileHover={{ translateY: -4, boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}
                 >
                   <div style={{ height: '100px', overflow: 'hidden', position: 'relative' }}>
-                    <img
-                      src={item.preview}
-                      alt={item.plant}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
+                    <img src={item.preview} alt={item.plant} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     <div style={{
-                      position: 'absolute',
-                      top: '8px',
-                      right: '8px',
+                      position: 'absolute', top: '8px', right: '8px',
                       background: item.isHealthy ? 'rgba(22,163,74,0.9)' : 'rgba(239,68,68,0.9)',
-                      color: 'white',
-                      borderRadius: '9999px',
-                      padding: '2px 8px',
-                      fontSize: '0.65rem',
-                      fontWeight: 700
+                      color: 'white', borderRadius: '9999px',
+                      padding: '2px 8px', fontSize: '0.65rem', fontWeight: 700
                     }}>
                       {item.isHealthy ? '✅ Sağlıklı' : '⚠️ Hastalık'}
                     </div>
