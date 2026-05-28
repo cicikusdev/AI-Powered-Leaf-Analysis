@@ -27,7 +27,8 @@ function TopPredictions({ predictions = [] }) {
               marginBottom: '4px',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
+              whiteSpace: 'normal',
+              wordBreak: 'break-word',
             }}>
               {language === 'en' && pred.class_name_en ? pred.class_name_en : pred.class_name}
             </span>
