@@ -31,7 +31,7 @@ MODEL_DIR = os.path.join(BASE_DIR, '..', 'bitki_projesi_model')
 # ---------------------------------------------------------------------------
 _model_cache = {}
 
-AVAILABLE_MODELS = ['best_model', 'best_model_v2', 'best_model_v3', 'best_model_v4']
+AVAILABLE_MODELS = ['best_model', 'best_model_v2', 'best_model_v3', 'best_model_v4', 'best_model_v5', 'best_model_v6']
 
 # ---------------------------------------------------------------------------
 # Disease information (Turkish)
