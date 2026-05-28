@@ -28,7 +28,7 @@ function AnalysisPage() {
   const [error, setError] = useState(null)
   const [history, setHistory] = useState([])
 
-  const handleImageSelect = async (file) => {
+  const handleImageSelect = (file) => {
     setSelectedImage(file)
     setResult(null)
     setError(null)
@@ -39,35 +39,37 @@ function AnalysisPage() {
       return
     }
 
-    // URL preview için
     const url = URL.createObjectURL(file)
     setPreviewUrl(url)
 
-    // Base64 PDF için
+    // Önce base64'e çevir, sonra analizi başlat
     const reader = new FileReader()
-    reader.onload = (e) => setPreviewBase64(e.target.result)
-    reader.readAsDataURL(file)
+    reader.onload = async (e) => {
+      const base64 = e.target.result
+      setPreviewBase64(base64)
 
-    setLoading(true)
-    try {
-      const data = await predictImage(file, 'best_model_v6')
-      setResult(data)
+      setLoading(true)
+      try {
+        const data = await predictImage(file, 'best_model_v6')
+        setResult(data)
 
-      setHistory(prev => [{
-        id: Date.now(),
-        preview: url,
-        plant: data.plant,
-        disease: data.disease,
-        isHealthy: data.is_healthy,
-        confidence: data.confidence,
-        timestamp: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
-      }, ...prev].slice(0, 5))
-    } catch (err) {
-      console.error('Prediction error:', err)
-      setError(err.response?.data?.error || 'Analiz sırasında bir hata oluştu.')
-    } finally {
-      setLoading(false)
+        setHistory(prev => [{
+          id: Date.now(),
+          preview: url,
+          plant: data.plant,
+          disease: data.disease,
+          isHealthy: data.is_healthy,
+          confidence: data.confidence,
+          timestamp: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+        }, ...prev].slice(0, 5))
+      } catch (err) {
+        console.error('Prediction error:', err)
+        setError(err.response?.data?.error || 'Analiz sırasında bir hata oluştu.')
+      } finally {
+        setLoading(false)
+      }
     }
+    reader.readAsDataURL(file)
   }
 
   return (
@@ -171,8 +173,7 @@ function AnalysisPage() {
                   transition={{ delay: i * 0.08 }}
                   whileHover={{ translateY: -4, boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}
                   style={{
-                    background: 'white', borderRadius: '16px',
-                    overflow: 'hidden',
+                    background: 'white', borderRadius: '16px', overflow: 'hidden',
                     border: `1px solid ${item.isHealthy ? 'rgba(22,163,74,0.15)' : 'rgba(239,68,68,0.15)'}`,
                     boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
                   }}
@@ -182,26 +183,19 @@ function AnalysisPage() {
                     <div style={{
                       position: 'absolute', top: '8px', right: '8px',
                       background: item.isHealthy ? 'rgba(22,163,74,0.9)' : 'rgba(239,68,68,0.9)',
-                      color: 'white', borderRadius: '9999px',
-                      padding: '2px 8px', fontSize: '0.65rem', fontWeight: 700
+                      color: 'white', borderRadius: '9999px', padding: '2px 8px', fontSize: '0.65rem', fontWeight: 700
                     }}>
                       {item.isHealthy ? '✅ Sağlıklı' : '⚠️ Hastalık'}
                     </div>
                   </div>
                   <div style={{ padding: '10px 12px' }}>
-                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '2px' }}>
-                      {item.plant}
-                    </div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '2px' }}>{item.plant}</div>
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginBottom: '4px' }}>
                       {item.isHealthy ? 'Sağlıklı' : item.disease}
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--green-600)', fontWeight: 600 }}>
-                        %{item.confidence.toFixed(1)}
-                      </span>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)' }}>
-                        {item.timestamp}
-                      </span>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--green-600)', fontWeight: 600 }}>%{item.confidence.toFixed(1)}</span>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)' }}>{item.timestamp}</span>
                     </div>
                   </div>
                 </motion.div>
