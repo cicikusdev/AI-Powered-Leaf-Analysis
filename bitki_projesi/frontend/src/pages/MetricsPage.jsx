@@ -142,7 +142,7 @@ function MetricsPage() {
         </motion.div>
       )}
 
-      <div className="metrics-grid-2col mb-8">
+      <div className="mb-8" style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '32px' }}>
         <motion.div variants={itemVariants} className="chart-container glass-panel">
           <div className="chart-header">
             <h3 className="chart-title">{t('chart_confusion_matrix')}</h3>
