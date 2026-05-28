@@ -41,6 +41,11 @@ function AnalysisPage() {
     const preview = URL.createObjectURL(file)
     setPreviewImage(preview)
 
+   // Base64 de oluştur PDF için
+   const reader = new FileReader()
+   reader.onload = (e) => setPreviewImage(e.target.result)
+   reader.readAsDataURL(file)
+
     setLoading(true)
     try {
       const data = await predictImage(file, 'best_model_v6')
