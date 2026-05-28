@@ -1,37 +1,40 @@
 import './LandingPage.css'
-import { useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { useLanguage } from '../context/LanguageContext'
 
 const features = [
   {
     icon: '🔬',
     title: 'Derin Öğrenme',
     desc: 'MobileNetV2 mimarisi ve transfer learning ile %98 doğrulukla hastalık tespiti.',
+    color: '#16a34a',
   },
   {
     icon: '🌿',
     title: '38 Hastalık Sınıfı',
     desc: '14 farklı bitkiye ait 38 hastalık sınıfını tanıyabilen kapsamlı model.',
+    color: '#059669',
   },
   {
     icon: '⚡',
     title: 'Anlık Analiz',
     desc: 'Yaprak fotoğrafınızı yükleyin, saniyeler içinde sonucu alın.',
+    color: '#0d9488',
   },
   {
     icon: '💊',
     title: 'Tedavi Önerisi',
     desc: 'Tespit edilen hastalık için detaylı açıklama ve tedavi önerisi.',
+    color: '#15803d',
   },
 ]
 
 const steps = [
-  { num: '01', title: 'Fotoğraf Yükle', desc: 'Hastalıklı olduğunu düşündüğünüz yaprağın net bir fotoğrafını yükleyin.' },
-  { num: '02', title: 'Yaprağı Kırp', desc: 'Makas ikonu ile yaprağı çerçeve içine alarak modelin doğruluğunu artırın.' },
-  { num: '03', title: 'Analiz Et', desc: 'Yapay zeka modelimiz yaprağı analiz ederek bitki türü ve hastalığını belirler.' },
-  { num: '04', title: 'Öneri Al', desc: 'Hastalık açıklaması ve tedavi önerisiyle bitkini korumaya başla.' },
+  { num: '01', icon: '📸', title: 'Fotoğraf Yükle', desc: 'Hastalıklı olduğunu düşündüğünüz yaprağın net bir fotoğrafını yükleyin.' },
+  { num: '02', icon: '✂️', title: 'Yaprağı Kırp', desc: 'Makas ikonu ile yaprağı çerçeve içine alarak modelin doğruluğunu artırın.' },
+  { num: '03', icon: '🤖', title: 'Analiz Et', desc: 'Yapay zeka modelimiz yaprağı analiz ederek bitki türü ve hastalığını belirler.' },
+  { num: '04', icon: '💡', title: 'Öneri Al', desc: 'Hastalık açıklaması ve tedavi önerisiyle bitkini korumaya başla.' },
 ]
 
 const stats = [
@@ -41,152 +44,171 @@ const stats = [
   { value: '54K+', label: 'Eğitim Görseli' },
 ]
 
+const plants = ['🍎', '🍅', '🥔', '🌽', '🍇', '🍓', '🍑', '🫑']
+
 export default function LandingPage() {
   const navigate = useNavigate()
-  const heroRef = useRef(null)
+  const [dark, setDark] = useState(false)
 
   return (
-    <div className="landing">
-      {/* HERO */}
-      <section className="hero" ref={heroRef}>
-        <div className="hero-bg">
-          <div className="hero-blob hero-blob-1" />
-          <div className="hero-blob hero-blob-2" />
-          <div className="hero-grid" />
+    <div className={`lp ${dark ? 'lp-dark' : 'lp-light'}`}>
+
+      {/* NAV */}
+      <nav className="lp-nav">
+        <div className="lp-nav-brand">
+          <span className="lp-nav-leaf">🌿</span>
+          <span className="lp-nav-name">LeafScan</span>
         </div>
-        <div className="hero-content">
+        <div className="lp-nav-actions">
+          <button className="lp-theme-toggle" onClick={() => setDark(!dark)} title="Tema Değiştir">
+            {dark ? '☀️' : '🌙'}
+          </button>
+          <button className="lp-nav-btn-ghost" onClick={() => navigate('/metrics')}>Metrikler</button>
+          <button className="lp-nav-btn-primary" onClick={() => navigate('/analyze')}>Analiz Başlat →</button>
+        </div>
+      </nav>
+
+      {/* HERO */}
+      <section className="lp-hero">
+        <div className="lp-deco lp-deco-1">🍃</div>
+        <div className="lp-deco lp-deco-2">🌿</div>
+        <div className="lp-deco lp-deco-3">🍀</div>
+        <div className="lp-deco lp-deco-4">🌱</div>
+
+        <div className="lp-hero-inner">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="hero-badge"
+            transition={{ duration: 0.7 }}
+            className="lp-hero-left"
           >
-            <span className="hero-badge-dot" />
-            Yapay Zeka Destekli Bitki Analizi
+            <div className="lp-pill">
+              <span className="lp-pill-dot" />
+              Yapay Zeka Destekli · %98 Doğruluk
+            </div>
+
+            <h1 className="lp-hero-title">
+              Bitkinin sağlığını<br />
+              <span className="lp-hero-accent">anında öğren</span>
+            </h1>
+
+            <p className="lp-hero-desc">
+              Yaprak fotoğrafı yükle, LeafScan bitki türünü ve hastalığını
+              saniyeler içinde tespit etsin. 14 bitki, 38 hastalık sınıfı.
+            </p>
+
+            <div className="lp-hero-btns">
+              <button className="lp-btn-primary" onClick={() => navigate('/analyze')}>
+                🔍 Analizi Başlat
+              </button>
+              <button className="lp-btn-outline" onClick={() => navigate('/metrics')}>
+                📊 Model Metrikleri
+              </button>
+            </div>
+
+            <div className="lp-stats">
+              {stats.map((s, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + i * 0.1 }}
+                  className="lp-stat"
+                >
+                  <span className="lp-stat-val">{s.value}</span>
+                  <span className="lp-stat-label">{s.label}</span>
+                </motion.div>
+              ))}
+            </div>
           </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="hero-title"
-          >
-            Bitkinin hastalığını
-            <br />
-            <span className="hero-title-accent">saniyeler içinde</span>
-            <br />
-            tespit et
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="hero-desc"
-          >
-            LeafScan, derin öğrenme ile yaprak fotoğrafından bitki hastalığını tespit eder.
-            <br />
-            14 bitki türü, 38 hastalık sınıfı, %98 doğruluk.
-          </motion.p>
-
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="hero-actions"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="lp-hero-right"
           >
-            <button className="hero-btn-primary" onClick={() => navigate('/analyze')}>
-              <span>Analizi Başlat</span>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <button className="hero-btn-secondary" onClick={() => navigate('/metrics')}>
-              Model Metrikleri
-            </button>
-          </motion.div>
-
-          {/* Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.5 }}
-            className="hero-stats"
-          >
-            {stats.map((s, i) => (
-              <div key={i} className="hero-stat">
-                <span className="hero-stat-value">{s.value}</span>
-                <span className="hero-stat-label">{s.label}</span>
+            <div className="lp-mockup">
+              <div className="lp-mockup-header">
+                <div className="lp-mockup-dots">
+                  <span className="dot-red" /><span className="dot-yellow" /><span className="dot-green" />
+                </div>
+                <span className="lp-mockup-title">LeafScan Analizi</span>
               </div>
-            ))}
+
+              <div className="lp-mockup-img">
+                <div className="lp-mockup-leaf-wrap">
+                  <span className="lp-mockup-leaf">🍃</span>
+                  <div className="lp-mockup-scan" />
+                </div>
+              </div>
+
+              <div className="lp-mockup-result">
+                <div className="lp-mockup-badge">✅ Sağlıklı Yaprak</div>
+                <div className="lp-mockup-row">
+                  <span>Bitki</span>
+                  <strong>🍎 Elma</strong>
+                </div>
+                <div className="lp-mockup-row">
+                  <span>Güven</span>
+                  <strong className="lp-mockup-conf">%99.2</strong>
+                </div>
+                <div className="lp-mockup-bar">
+                  <motion.div
+                    className="lp-mockup-bar-fill"
+                    initial={{ width: 0 }}
+                    animate={{ width: '99.2%' }}
+                    transition={{ duration: 1.5, delay: 0.8, ease: [0.34, 1.56, 0.64, 1] }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="lp-plants">
+              {plants.map((p, i) => (
+                <motion.span
+                  key={i}
+                  className="lp-plant-icon"
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5 + i * 0.08, type: 'spring' }}
+                >
+                  {p}
+                </motion.span>
+              ))}
+            </div>
           </motion.div>
         </div>
-
-        {/* Hero visual */}
-        <motion.div
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="hero-visual"
-        >
-          <div className="hero-card">
-            <div className="hero-card-header">
-              <div className="hero-card-dots">
-                <span /><span /><span />
-              </div>
-              <span className="hero-card-title">LeafScan Analizi</span>
-            </div>
-            <div className="hero-card-img">
-              <div className="hero-card-leaf">🍃</div>
-            </div>
-            <div className="hero-card-result">
-              <div className="hero-card-badge healthy">✅ Sağlıklı Yaprak</div>
-              <div className="hero-card-row">
-                <span>Bitki</span>
-                <strong>🍎 Elma</strong>
-              </div>
-              <div className="hero-card-row">
-                <span>Model Güveni</span>
-                <strong>%99.2</strong>
-              </div>
-              <div className="hero-card-progress">
-                <div className="hero-card-progress-fill" style={{ width: '99.2%' }} />
-              </div>
-            </div>
-          </div>
-
-          {/* Floating tags */}
-          <div className="hero-tag hero-tag-1">🌿 38 Hastalık Sınıfı</div>
-          <div className="hero-tag hero-tag-2">⚡ Anlık Sonuç</div>
-        </motion.div>
       </section>
 
       {/* FEATURES */}
-      <section className="features-section">
-        <div className="section-container">
+      <section className="lp-features">
+        <div className="lp-section-wrap">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="section-header"
+            className="lp-section-head"
           >
-            <span className="section-tag">Özellikler</span>
-            <h2 className="section-title">Neden LeafScan?</h2>
-            <p className="section-desc">Gelişmiş yapay zeka teknolojisi ile bitkilerinizi koruyun.</p>
+            <span className="lp-tag">Neden LeafScan?</span>
+            <h2 className="lp-section-title">Akıllı Bitki Sağlığı</h2>
+            <p className="lp-section-sub">Gelişmiş yapay zeka ile bitkilerinizi koruyun.</p>
           </motion.div>
 
-          <div className="features-grid">
+          <div className="lp-features-grid">
             {features.map((f, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="feature-card"
+                transition={{ delay: i * 0.1 }}
+                className="lp-feature-card"
+                style={{ '--accent': f.color }}
               >
-                <div className="feature-icon">{f.icon}</div>
-                <h3 className="feature-title">{f.title}</h3>
-                <p className="feature-desc">{f.desc}</p>
+                <div className="lp-feature-icon">{f.icon}</div>
+                <h3 className="lp-feature-title">{f.title}</h3>
+                <p className="lp-feature-desc">{f.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -194,61 +216,64 @@ export default function LandingPage() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section className="how-section">
-        <div className="section-container">
+      <section className="lp-how">
+        <div className="lp-section-wrap">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="section-header"
+            className="lp-section-head"
           >
-            <span className="section-tag">Nasıl Çalışır?</span>
-            <h2 className="section-title">4 Adımda Hastalık Tespiti</h2>
-            <p className="section-desc">Birkaç saniye içinde bitkinin sağlık durumunu öğren.</p>
+            <span className="lp-tag">Nasıl Çalışır?</span>
+            <h2 className="lp-section-title">4 Adımda Tespit</h2>
+            <p className="lp-section-sub">Birkaç saniye içinde bitkinin sağlık durumunu öğren.</p>
           </motion.div>
 
-          <div className="steps-grid">
+          <div className="lp-steps">
             {steps.map((s, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.12 }}
-                className="step-card"
+                transition={{ delay: i * 0.12 }}
+                className="lp-step"
               >
-                <div className="step-num">{s.num}</div>
-                <h3 className="step-title">{s.title}</h3>
-                <p className="step-desc">{s.desc}</p>
-                {i < steps.length - 1 && <div className="step-arrow">→</div>}
+                <div className="lp-step-num">{s.num}</div>
+                <div className="lp-step-icon">{s.icon}</div>
+                <h3 className="lp-step-title">{s.title}</h3>
+                <p className="lp-step-desc">{s.desc}</p>
               </motion.div>
             ))}
           </div>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="how-cta"
+            transition={{ delay: 0.5 }}
+            className="lp-how-cta"
           >
-            <button className="hero-btn-primary" onClick={() => navigate('/analyze')}>
-              <span>Hemen Dene</span>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <button className="lp-btn-primary" onClick={() => navigate('/analyze')}>
+              🚀 Hemen Dene
             </button>
           </motion.div>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="landing-footer">
-        <div className="footer-content">
-          <div className="footer-brand">
-            <span className="footer-icon">🌿</span>
-            <span className="footer-name">LeafScan</span>
+      <footer className="lp-footer">
+        <div className="lp-footer-inner">
+          <div className="lp-footer-brand">
+            <span>🌿</span>
+            <span className="lp-footer-name">LeafScan</span>
           </div>
-          <p className="footer-copy">LeafScan v2.0 · MobileNetV2 + Transfer Learning · PlantVillage & PlantDoc Dataset · 2026</p>
+          <p className="lp-footer-copy">
+            LeafScan v2.0 · MobileNetV2 + Transfer Learning · PlantVillage & PlantDoc · 2026
+          </p>
+          <button className="lp-footer-btn" onClick={() => navigate('/analyze')}>
+            Analiz Başlat →
+          </button>
         </div>
       </footer>
     </div>
