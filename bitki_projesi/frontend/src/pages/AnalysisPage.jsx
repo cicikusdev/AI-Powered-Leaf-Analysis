@@ -21,7 +21,8 @@ const DECO_POSITIONS = [
 function AnalysisPage() {
   const { t } = useLanguage()
   const [selectedImage, setSelectedImage] = useState(null)
-  const [previewImage, setPreviewImage] = useState(null)
+  const [previewBase64, setPreviewBase64] = useState(null)
+  const [previewUrl, setPreviewUrl] = useState(null)
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -33,28 +34,28 @@ function AnalysisPage() {
     setError(null)
 
     if (!file) {
-      setPreviewImage(null)
+      setPreviewBase64(null)
+      setPreviewUrl(null)
       return
     }
 
-    // Preview URL oluştur
-    const preview = URL.createObjectURL(file)
-    setPreviewImage(preview)
+    // URL preview için
+    const url = URL.createObjectURL(file)
+    setPreviewUrl(url)
 
-   // Base64 de oluştur PDF için
-   const reader = new FileReader()
-   reader.onload = (e) => setPreviewImage(e.target.result)
-   reader.readAsDataURL(file)
+    // Base64 PDF için
+    const reader = new FileReader()
+    reader.onload = (e) => setPreviewBase64(e.target.result)
+    reader.readAsDataURL(file)
 
     setLoading(true)
     try {
       const data = await predictImage(file, 'best_model_v6')
       setResult(data)
 
-      // Geçmişe ekle
       setHistory(prev => [{
         id: Date.now(),
-        preview,
+        preview: url,
         plant: data.plant,
         disease: data.disease,
         isHealthy: data.is_healthy,
@@ -63,7 +64,7 @@ function AnalysisPage() {
       }, ...prev].slice(0, 5))
     } catch (err) {
       console.error('Prediction error:', err)
-      setError(err.response?.data?.error || 'Analiz sırasında bir hata oluştu. Lütfen tekrar deneyin.')
+      setError(err.response?.data?.error || 'Analiz sırasında bir hata oluştu.')
     } finally {
       setLoading(false)
     }
@@ -78,7 +79,6 @@ function AnalysisPage() {
       transition={{ duration: 0.4 }}
       style={{ position: 'relative' }}
     >
-      {/* Dekoratif arka plan ikonları */}
       {DECO_POSITIONS.map((pos, i) => (
         <motion.span
           key={i}
@@ -118,7 +118,6 @@ function AnalysisPage() {
               selectedImage={selectedImage}
               loading={loading}
             />
-
             {error && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -139,12 +138,12 @@ function AnalysisPage() {
             <AnalysisResult
               result={result}
               loading={loading}
-              previewImage={previewImage}
+              previewImage={previewUrl}
+              previewBase64={previewBase64}
             />
           </div>
         </div>
 
-        {/* ANALİZ GEÇMİŞİ */}
         {history.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
