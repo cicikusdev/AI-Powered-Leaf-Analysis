@@ -4,7 +4,6 @@ import { useLanguage } from '../context/LanguageContext'
 function TopPredictions({ predictions = [] }) {
   const { t, language } = useLanguage()
   const top5 = predictions.slice(0, 5)
-
   if (top5.length === 0) return null
 
   return (
@@ -19,13 +18,13 @@ function TopPredictions({ predictions = [] }) {
           transition={{ delay: index * 0.1, duration: 0.4 }}
         >
           <div className="prediction-info">
-            <span className="prediction-name">{language === 'en' && pred.class_name_en ? pred.class_name_en : pred.class_name}</span>
+            <span className="prediction-name">
+              {language === 'en' && pred.class_name_en ? pred.class_name_en : pred.class_name}
+            </span>
             <div className="prediction-bar-container">
-              <motion.div
+              <div
                 className="prediction-bar"
-                initial={{ width: 0 }}
-                animate={{ width: `${pred.confidence}%` }}
-                transition={{ delay: 0.2 + index * 0.1, duration: 0.8, ease: 'easeOut' }}
+                style={{ width: `${pred.confidence}%` }}
               />
             </div>
           </div>
