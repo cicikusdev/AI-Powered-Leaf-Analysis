@@ -1,0 +1,38 @@
+# ========================
+# 1. BÜYÜK VERİ SETLERİ VE MODELLER
+# ========================
+# GitHub'ın tek bir dosya için 100MB sınırı vardır. Çok büyük datasetler yüklenmez.
+bitki_projesi/bitki_projesi_model/archive/
+bitki_projesi/bitki_projesi_model/plantvillage/
+# Model dosyalarınız (.keras) 100MB'dan büyükse alt satırın başındaki diyezi (#) kaldırın:
+# bitki_projesi_model/*.keras
+
+# ========================
+# 2. FRONTEND (React / Vite) GEREKSİZ DOSYALARI
+# ========================
+bitki_projesi/frontend/node_modules/
+bitki_projesi/frontend/dist/
+bitki_projesi/frontend/.env
+bitki_projesi/frontend/npm-debug.log*
+
+# ========================
+# 3. BACKEND (Python / Flask) GEREKSİZ DOSYALARI
+# ========================
+__pycache__/
+*.py[cod]
+# Sanal Ortam (Virtual Environment) klasörü
+bitki_projesi/backend/venv/
+bitki_projesi/backend/env/
+# Önbellek dosyaları
+bitki_projesi/backend/metrics_cache.json
+# Resim Yükleme Klasörü (Test için yüklenen geçici resimler)
+bitki_projesi/backend/uploads/
+
+# ========================
+# 4. İŞLETİM SİSTEMİ VE EDİTÖR DOSYALARI
+# ========================
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
