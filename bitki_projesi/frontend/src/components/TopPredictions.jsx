@@ -12,50 +12,42 @@ function TopPredictions({ predictions = [] }) {
       {top5.map((pred, index) => (
         <motion.div
           key={index}
-          className="prediction-item"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: index * 0.1, duration: 0.4 }}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}
+          style={{ marginBottom: '12px' }}
         >
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
             <span style={{
-              display: 'block',
               fontSize: '0.78rem',
               fontWeight: 500,
               color: 'var(--text-primary)',
-              marginBottom: '4px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'normal',
-              wordBreak: 'break-word',
             }}>
               {language === 'en' && pred.class_name_en ? pred.class_name_en : pred.class_name}
             </span>
-            <div style={{
-              height: '6px',
-              background: 'var(--slate-100)',
-              borderRadius: '9999px',
-              overflow: 'hidden',
+            <span style={{
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              color: 'var(--text-secondary)',
+              marginLeft: '8px',
+              flexShrink: 0,
             }}>
-              <div style={{
-                height: '100%',
-                width: `${pred.confidence}%`,
-                background: 'linear-gradient(90deg, #16a34a, #059669)',
-                borderRadius: '9999px',
-              }} />
-            </div>
+              %{pred.confidence.toFixed(1)}
+            </span>
           </div>
-          <span style={{
-            fontSize: '0.78rem',
-            fontWeight: 600,
-            color: 'var(--text-secondary)',
-            minWidth: '42px',
-            textAlign: 'right',
-            flexShrink: 0,
+          <div style={{
+            height: '6px',
+            background: 'var(--slate-100)',
+            borderRadius: '9999px',
+            overflow: 'hidden',
           }}>
-            %{pred.confidence.toFixed(1)}
-          </span>
+            <div style={{
+              height: '100%',
+              width: `${pred.confidence}%`,
+              background: 'linear-gradient(90deg, #16a34a, #059669)',
+              borderRadius: '9999px',
+            }} />
+          </div>
         </motion.div>
       ))}
     </div>
