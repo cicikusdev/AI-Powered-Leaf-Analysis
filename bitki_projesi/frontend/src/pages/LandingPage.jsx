@@ -88,8 +88,8 @@ export default function LandingPage() {
             </div>
 
             <h1 className="lp-hero-title">
-              Bitkinin sağlığını<br />
-              <span className="lp-hero-accent">anında öğren</span>
+              Bitkinin Sağlığını<br />
+              <span className="lp-hero-accent">Anında Öğren</span>
             </h1>
 
             <p className="lp-hero-desc">
