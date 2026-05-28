@@ -4,36 +4,65 @@ import ConfidenceBar from './ConfidenceBar'
 import TopPredictions from './TopPredictions'
 import { useLanguage } from '../context/LanguageContext'
 
-function AnalysisResult({ result, loading }) {
+function AnalysisResult({ result, loading, previewImage }) {
   const { t, language } = useLanguage()
   const resultRef = useRef(null)
 
-  const handlePrint = () => {
-    window.print()
+  const handleSavePDF = async () => {
+    if (!result) return
+    try {
+      const { default: html2canvas } = await import('html2canvas')
+      const { default: jsPDF } = await import('jspdf')
+
+      const element = resultRef.current
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+      })
+
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+
+      // Başlık
+      pdf.setFontSize(18)
+      pdf.setTextColor(22, 163, 74)
+      pdf.text('🌿 LeafScan - Analiz Sonucu', 14, 20)
+
+      pdf.setFontSize(10)
+      pdf.setTextColor(100, 116, 139)
+      pdf.text(`Tarih: ${new Date().toLocaleString('tr-TR')}`, 14, 28)
+
+      // Görsel varsa ekle
+      if (previewImage) {
+        try {
+          pdf.addImage(previewImage, 'JPEG', 14, 35, 60, 50)
+        } catch (e) {}
+      }
+
+      // Sonuç kartı
+      pdf.addImage(imgData, 'PNG', 14, previewImage ? 92 : 35, pdfWidth - 28, Math.min(pdfHeight, 180))
+
+      pdf.save(`leafscan-analiz-${Date.now()}.pdf`)
+    } catch (err) {
+      console.error('PDF hatası:', err)
+      // Fallback: txt kaydet
+      const content = `LeafScan - Analiz Sonucu\n========================\nBitki: ${result.plant || result.plant_en}\nDurum: ${result.is_healthy ? 'Sağlıklı' : 'Hastalık'}\nModel Güveni: %${result.confidence?.toFixed(1)}\n${result.description ? `\nAçıklama: ${result.description}` : ''}\nTarih: ${new Date().toLocaleString('tr-TR')}`
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `leafscan-analiz-${Date.now()}.txt`
+      a.click()
+      URL.revokeObjectURL(url)
+    }
   }
 
-  const handleSave = () => {
-    if (!result) return
-    const content = `
-LeafScan - Analiz Sonucu
-========================
-Bitki: ${result.plant || result.plant_en}
-Durum: ${result.is_healthy ? 'Sağlıklı' : 'Hastalık Tespit Edildi'}
-${!result.is_healthy ? `Hastalık: ${result.disease || result.disease_en}` : ''}
-Model Güveni: %${result.confidence?.toFixed(1)}
-${result.description ? `\nAçıklama: ${result.description}` : ''}
-${result.recommendation ? `\nÖneri: ${result.recommendation}` : ''}
-
-Tarih: ${new Date().toLocaleString('tr-TR')}
-    `.trim()
-
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `leafscan-analiz-${Date.now()}.txt`
-    a.click()
-    URL.revokeObjectURL(url)
+  const handlePrint = () => {
+    window.print()
   }
 
   if (loading) {
@@ -78,7 +107,6 @@ Tarih: ${new Date().toLocaleString('tr-TR')}
     <AnimatePresence mode="wait">
       <motion.div
         className="result-panel"
-        ref={resultRef}
         initial={{ opacity: 0, scale: 0.97 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, type: 'spring', stiffness: 120 }}
@@ -88,140 +116,137 @@ Tarih: ${new Date().toLocaleString('tr-TR')}
             : '1.5px solid rgba(239,68,68,0.2)',
         }}
       >
-        <motion.div
-          className="result-details"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {/* Durum Badge */}
+        {/* PDF için ref alan — görsel + sonuç */}
+        <div ref={resultRef}>
+          {/* Yüklenen görsel */}
+          {previewImage && (
+            <div style={{ marginBottom: '16px', borderRadius: '12px', overflow: 'hidden', maxHeight: '200px' }}>
+              <img
+                src={previewImage}
+                alt="Analiz edilen yaprak"
+                style={{ width: '100%', height: '200px', objectFit: 'cover', display: 'block' }}
+              />
+            </div>
+          )}
+
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 200, delay: 0.1 }}
+            className="result-details"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            {result.is_healthy ? (
-              <div className="result-badge healthy" style={{ fontSize: '1rem', padding: '12px 24px' }}>
-                ✅ {t('badge_healthy')}
-              </div>
-            ) : (
-              <div className="result-badge diseased" style={{ fontSize: '1rem', padding: '12px 24px' }}>
-                ⚠️ {t('badge_diseased')}
-              </div>
+            {/* Durum Badge */}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 200, delay: 0.1 }}
+            >
+              {result.is_healthy ? (
+                <div className="result-badge healthy" style={{ fontSize: '1rem', padding: '12px 24px' }}>
+                  ✅ {t('badge_healthy')}
+                </div>
+              ) : (
+                <div className="result-badge diseased" style={{ fontSize: '1rem', padding: '12px 24px' }}>
+                  ⚠️ {t('badge_diseased')}
+                </div>
+              )}
+            </motion.div>
+
+            {/* Bitki */}
+            <div className="result-detail-row">
+              <span className="result-detail-label">{t('plant_label')}</span>
+              <span className="result-detail-value">🌱 {language === 'en' ? result.plant_en : result.plant || '—'}</span>
+            </div>
+
+            {/* Hastalık */}
+            {!result.is_healthy && (
+              <motion.div
+                className="result-detail-row"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+                style={{ background: 'rgba(239,68,68,0.04)', borderLeft: '3px solid #ef4444' }}
+              >
+                <span className="result-detail-label">{t('disease_label')}</span>
+                <span className="result-detail-value" style={{ color: '#dc2626' }}>
+                  🦠 {language === 'en' ? result.disease_en : result.disease || '—'}
+                </span>
+              </motion.div>
+            )}
+
+            {/* Güven */}
+            <ConfidenceBar confidence={result.confidence} />
+
+            {/* Top Tahminler */}
+            {result.top_predictions?.length > 0 && (
+              <TopPredictions predictions={result.top_predictions} />
+            )}
+
+            {/* Açıklama */}
+            {result.description && (
+              <motion.div
+                className="info-card"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <div className="info-card-title">📋 {t('about_disease')}</div>
+                <p className="info-card-text">{result.description}</p>
+              </motion.div>
+            )}
+
+            {/* Öneri */}
+            {!result.is_healthy && result.recommendation && (
+              <motion.div
+                className="info-card recommendation"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <div className="info-card-title">💊 {t('recommendation')}</div>
+                <p className="info-card-text">{result.recommendation}</p>
+              </motion.div>
             )}
           </motion.div>
+        </div>
 
-          {/* Bitki & Hastalık */}
-          <div className="result-detail-row">
-            <span className="result-detail-label">{t('plant_label')}</span>
-            <span className="result-detail-value">🌱 {language === 'en' ? result.plant_en : result.plant || '—'}</span>
-          </div>
-
-          {!result.is_healthy && (
-            <motion.div
-              className="result-detail-row"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              style={{ background: 'rgba(239,68,68,0.04)', borderLeft: '3px solid #ef4444' }}
-            >
-              <span className="result-detail-label">{t('disease_label')}</span>
-              <span className="result-detail-value" style={{ color: '#dc2626' }}>
-                🦠 {language === 'en' ? result.disease_en : result.disease || '—'}
-              </span>
-            </motion.div>
-          )}
-
-          {/* Güven */}
-          <ConfidenceBar confidence={result.confidence} />
-
-          {/* Top Tahminler */}
-          {result.top_predictions?.length > 0 && (
-            <TopPredictions predictions={result.top_predictions} />
-          )}
-
-          {/* Açıklama */}
-          {result.description && (
-            <motion.div
-              className="info-card"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <div className="info-card-title">📋 {t('about_disease')}</div>
-              <p className="info-card-text">{result.description}</p>
-            </motion.div>
-          )}
-
-          {/* Öneri */}
-          {!result.is_healthy && result.recommendation && (
-            <motion.div
-              className="info-card recommendation"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <div className="info-card-title">💊 {t('recommendation')}</div>
-              <p className="info-card-text">{result.recommendation}</p>
-            </motion.div>
-          )}
-
-          {/* Kaydet / Yazdır Butonları */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            style={{ display: 'flex', gap: '10px', marginTop: '8px' }}
+        {/* Butonlar — PDF dışında */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          style={{ display: 'flex', gap: '10px', marginTop: '16px' }}
+        >
+          <button
+            onClick={handleSavePDF}
+            style={{
+              flex: 1, padding: '10px', borderRadius: '10px',
+              border: '1px solid rgba(22,163,74,0.2)',
+              background: 'rgba(22,163,74,0.06)', color: 'var(--green-700)',
+              fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              gap: '6px', transition: 'all 0.2s ease', fontFamily: 'inherit'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(22,163,74,0.12)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(22,163,74,0.06)'}
           >
-            <button
-              onClick={handleSave}
-              style={{
-                flex: 1,
-                padding: '10px',
-                borderRadius: '10px',
-                border: '1px solid rgba(22,163,74,0.2)',
-                background: 'rgba(22,163,74,0.06)',
-                color: 'var(--green-700)',
-                fontWeight: 600,
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                transition: 'all 0.2s ease',
-                fontFamily: 'inherit'
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(22,163,74,0.12)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'rgba(22,163,74,0.06)'}
-            >
-              💾 Kaydet
-            </button>
-            <button
-              onClick={handlePrint}
-              style={{
-                flex: 1,
-                padding: '10px',
-                borderRadius: '10px',
-                border: '1px solid rgba(0,0,0,0.08)',
-                background: 'var(--slate-50)',
-                color: 'var(--text-secondary)',
-                fontWeight: 600,
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                transition: 'all 0.2s ease',
-                fontFamily: 'inherit'
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = 'var(--slate-100)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'var(--slate-50)'}
-            >
-              🖨️ Yazdır
-            </button>
-          </motion.div>
+            💾 PDF Kaydet
+          </button>
+          <button
+            onClick={handlePrint}
+            style={{
+              flex: 1, padding: '10px', borderRadius: '10px',
+              border: '1px solid rgba(0,0,0,0.08)',
+              background: 'var(--slate-50)', color: 'var(--text-secondary)',
+              fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              gap: '6px', transition: 'all 0.2s ease', fontFamily: 'inherit'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--slate-100)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'var(--slate-50)'}
+          >
+            🖨️ Yazdır
+          </button>
         </motion.div>
       </motion.div>
     </AnimatePresence>
