@@ -1,3 +1,248 @@
+# 🌿 LeafScan — Plant Disease Detection
+
+An AI-powered plant disease detection system. Upload a leaf photo to find out the plant species and its disease.
+
+*(Türkçe versiyon için aşağı kaydırın / Scroll down for Turkish version)*
+
+## 📋 About the Project
+
+This project is a deep learning-based plant disease detection application. The models, trained using the MobileNetV2 architecture and transfer learning, can recognize 38 disease classes across 14 different plants.
+
+### Features
+
+- 🔬 **Leaf Analysis:** Upload a leaf photo to detect the plant species and disease
+- 📊 **Model Metrics:** Detailed performance metrics such as Accuracy, Precision, Recall, F1-Score, WMAPE, ROC Curve
+- 🔄 **Model Comparison:** Compare the performance of 4 different models side-by-side
+- 📈 **Visualization:** Confusion Matrix, ROC curve, training charts, and more
+
+## 🏗️ Architecture
+
+```text
+┌──────────────────┐     REST API     ┌──────────────────┐
+│   React Frontend │ ◄──────────────► │   Flask Backend   │
+│   (Vite :5173)   │                  │   (Python :5000)  │
+└──────────────────┘                  └────────┬─────────┘
+                                               │
+                                    ┌──────────┴─────────┐
+                                    │  Keras Models       │
+                                    │  (MobileNetV2 x4)  │
+                                    └────────────────────┘
+```
+
+### Technology Stack
+
+| Layer | Technology |
+|--------|-----------|
+| **Frontend** | React 19, Vite, Recharts, Framer Motion, Lucide Icons |
+| **Backend** | Flask, Flask-CORS |
+| **Model** | TensorFlow/Keras, MobileNetV2 (Transfer Learning) |
+| **Dataset** | PlantDoc Classification Dataset, PlantVillage Dataset (38 classes, ~54,000 images) | 
+| **Evaluation** | scikit-learn |
+
+## 🌱 Supported Plants and Diseases (38 Classes)
+
+| Plant | Diseases |
+|-------|-------------|
+| 🍎 Apple | Apple scab, Black rot, Cedar apple rust, Healthy |
+| 🫐 Blueberry | Healthy |
+| 🍒 Cherry | Powdery mildew, Healthy |
+| 🌽 Corn | Cercospora leaf spot, Common rust, Northern Leaf Blight, Healthy |
+| 🍇 Grape | Black rot, Esca, Leaf blight, Healthy |
+| 🍊 Orange | Huanglongbing |
+| 🍑 Peach | Bacterial spot, Healthy |
+| 🫑 Pepper | Bacterial spot, Healthy |
+| 🥔 Potato | Early blight, Late blight, Healthy |
+| 🫐 Raspberry | Healthy |
+| 🌱 Soybean | Healthy |
+| 🎃 Squash | Powdery mildew |
+| 🍓 Strawberry | Leaf scorch, Healthy |
+| 🍅 Tomato | Bacterial spot, Early blight, Late blight, Leaf Mold, Septoria leaf spot, Spider mites, Target Spot, Yellow Leaf Curl Virus, Mosaic virus, Healthy |
+
+## 🚀 Installation
+
+### Prerequisites
+
+- Python 3.9+
+- Node.js 18+
+- npm 9+
+
+### 1. Backend Setup
+
+```bash
+cd backend
+pip install -r requirements.txt
+```
+
+### 2. Calculating Model Metrics (First Time)
+
+Run the following script to calculate model performance metrics. This process may take a while the first time:
+
+```bash
+cd backend
+python evaluate_models.py
+```
+
+For a quick test (50 images per class):
+```bash
+python evaluate_models.py --quick
+```
+
+This command generates the `metrics_cache.json` file. Subsequent runs will read metrics from this file.
+
+### 3. Frontend Setup
+
+```bash
+cd backend
+npm install
+```
+
+## ▶️ Running the App
+
+### 1. Start Backend
+
+```bash
+cd backend
+python app.py
+```
+
+The backend runs at http://localhost:5000.
+
+### 2. Start Frontend
+
+Open a new terminal:
+
+```bash
+cd frontend
+npm run dev
+```
+
+The frontend runs at http://localhost:5173.
+
+### 3. Open in Browser
+
+Go to http://localhost:5173.
+
+## 📖 Usage
+
+### Leaf Analysis
+
+1. Upload a leaf photo to the "Drag or click to upload a leaf photo" area on the home page
+2. The application will analyze it automatically
+3. The results will be displayed on the right panel:
+   - Plant species (in English/Turkish)
+   - Disease name (if any)
+   - Model confidence score (%)
+   - Top 5 predictions
+   - Disease description and treatment recommendation
+
+### Model Metrics
+
+Click on the "Model Metrics" tab to access detailed performance analysis:
+
+- **General Metrics:** Accuracy, Precision, Recall, F1-Score, WMAPE, AUC cards
+- **Model Comparison:** Compare 4 models using bar and radar charts
+- **Training Process:** Accuracy and Loss curves
+- **Confusion Matrix:** 38×38 interactive heatmap
+- **ROC Curve:** Multi-class ROC curves and AUC values
+- **Class-based Table:** Sortable and filterable performance table
+- **Error Analysis:** Class-based error rate chart
+
+## 🔌 API Documentation
+
+| Endpoint | Method | Description |
+|----------|--------|----------|
+| `/api/health` | GET | Health check |
+| `/api/predict` | POST | Upload image → get prediction |
+| `/api/classes` | GET | Supported class list |
+| `/api/models` | GET | Available model list |
+| `/api/metrics` | GET | Metrics of all models |
+| `/api/metrics/<model>` | GET | Metrics of a single model |
+
+### Predict API Example
+
+```bash
+curl -X POST -F "image=@leaf.jpg" -F "model=best_model_v4" http://localhost:5000/api/predict
+```
+
+## 📁 Project Structure
+
+```text
+bitki_projesi/
+├── backend/
+│   ├── app.py                 # Flask API server
+│   ├── evaluate_models.py     # Model evaluation script
+│   ├── requirements.txt       # Python dependencies
+│   └── metrics_cache.json     # Calculated metrics (auto-generated)
+├── frontend/
+│   ├── src/
+│   │   ├── components/        # React components
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── ImageUpload.jsx
+│   │   │   ├── AnalysisResult.jsx
+│   │   │   ├── ConfidenceBar.jsx
+│   │   │   ├── TopPredictions.jsx
+│   │   │   ├── MetricCards.jsx
+│   │   │   ├── ConfusionMatrix.jsx
+│   │   │   ├── RocCurve.jsx
+│   │   │   ├── TrainingChart.jsx
+│   │   │   ├── ClassMetricsTable.jsx
+│   │   │   ├── ModelComparison.jsx
+│   │   │   └── WmapeChart.jsx
+│   │   ├── pages/
+│   │   │   ├── AnalysisPage.jsx
+│   │   │   └── MetricsPage.jsx
+│   │   ├── services/
+│   │   │   └── api.js
+│   │   ├── App.jsx
+│   │   ├── App.css
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.js
+├── bitki_projesi_model/
+│   ├── best_model.keras       # Model v1
+│   ├── best_model_v2.keras    # Model v2
+│   ├── best_model_v3.keras    # Model v3
+│   ├── best_model_v4.keras    # Model v4 (default)
+│   ├── class_names.json       # 38 class labels
+│   ├── plantvillage/          # PlantVillage dataset
+│   └── archive/               # Archive dataset
+└── README.md
+```
+
+## 🧠 Model Information
+
+### Architecture
+- **Base Model:** MobileNetV2 (transfer learning with ImageNet weights)
+- **Input Size:** 128×128 pixels, RGB
+- **Output:** 38 classes (softmax)
+- **Training:** Fine-tuning + data augmentation
+
+### Models
+
+| Model | File | Size | Description |
+|-------|-------|-------|----------|
+| v1 | `best_model.keras` | ~11 MB | Initial version |
+| v2 | `best_model_v2.keras` | ~11 MB | Hyperparameter optimization |
+| v3 | `best_model_v3.keras` | ~23 MB | Expanded architecture |
+| v4 | `best_model_v4.keras` | ~23 MB | Final version (default) |
+
+### Dataset
+- **PlantVillage Dataset:** 38 classes, ~630 images per class, ~54,000 images in total
+- **Train/Test Split:** 80% train, 20% test (stratified)
+
+## 📄 License
+
+This project was developed for educational purposes.
+
+---
+
+*LeafScan v2.0 · MobileNetV2 + Transfer Learning · PlantVillage Dataset · 2026*
+
+--------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------
+
 # 🌿 LeafScan — Bitki Hastalığı Tespiti
 
 Yapay zeka destekli bitki hastalığı tespit sistemi. Yaprak fotoğrafı yükleyin, bitkinin türünü ve hastalığını öğrenin.
@@ -15,7 +260,7 @@ Bu proje, derin öğrenme tabanlı bir bitki hastalığı tespit uygulamasıdır
 
 ## 🏗️ Mimari
 
-```
+```text
 ┌──────────────────┐     REST API     ┌──────────────────┐
 │   React Frontend │ ◄──────────────► │   Flask Backend   │
 │   (Vite :5173)   │                  │   (Python :5000)  │
@@ -164,7 +409,7 @@ curl -X POST -F "image=@yaprak.jpg" -F "model=best_model_v4" http://localhost:50
 
 ## 📁 Proje Yapısı
 
-```
+```text
 bitki_projesi/
 ├── backend/
 │   ├── app.py                 # Flask API sunucusu
