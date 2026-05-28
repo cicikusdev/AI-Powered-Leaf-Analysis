@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import ImageUpload from '../components/ImageUpload'
 import AnalysisResult from '../components/AnalysisResult'
 import { predictImage } from '../services/api'
@@ -18,6 +18,23 @@ const DECO_POSITIONS = [
   { top: '60%', right: '5%', size: '1.8rem', rotate: -25, delay: 0.2 },
 ]
 
+const SUPPORTED_PLANTS = [
+  { emoji: '🍎', name: 'Elma', diseases: ['Karaleke', 'Kara Çürüklük', 'Sedir Pası', 'Sağlıklı'] },
+  { emoji: '🫐', name: 'Yaban Mersini', diseases: ['Sağlıklı'] },
+  { emoji: '🍒', name: 'Kiraz', diseases: ['Küllü Mildiyö', 'Sağlıklı'] },
+  { emoji: '🌽', name: 'Mısır', diseases: ['Cercospora', 'Yaygın Pas', 'Kuzey Yaprak Yanıklığı', 'Sağlıklı'] },
+  { emoji: '🍇', name: 'Üzüm', diseases: ['Kara Çürüklük', 'Esca', 'Yaprak Yanıklığı', 'Sağlıklı'] },
+  { emoji: '🍊', name: 'Portakal', diseases: ['Huanglongbing'] },
+  { emoji: '🍑', name: 'Şeftali', diseases: ['Bakteriyel Leke', 'Sağlıklı'] },
+  { emoji: '🫑', name: 'Biber', diseases: ['Bakteriyel Leke', 'Sağlıklı'] },
+  { emoji: '🥔', name: 'Patates', diseases: ['Erken Yanıklık', 'Geç Yanıklık', 'Sağlıklı'] },
+  { emoji: '🫐', name: 'Ahududu', diseases: ['Sağlıklı'] },
+  { emoji: '🌱', name: 'Soya Fasulyesi', diseases: ['Sağlıklı'] },
+  { emoji: '🎃', name: 'Kabak', diseases: ['Küllü Mildiyö'] },
+  { emoji: '🍓', name: 'Çilek', diseases: ['Yaprak Yanması', 'Sağlıklı'] },
+  { emoji: '🍅', name: 'Domates', diseases: ['Bakteriyel Leke', 'Erken Yanıklık', 'Geç Yanıklık', 'Yaprak Küfü', 'Septoria', 'Kırmızı Örümcek', 'Hedef Leke', 'Sarı Yaprak Kıvırcıklık Virüsü', 'Mozaik Virüsü', 'Sağlıklı'] },
+]
+
 function AnalysisPage() {
   const { t } = useLanguage()
   const [selectedImage, setSelectedImage] = useState(null)
@@ -27,6 +44,7 @@ function AnalysisPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [history, setHistory] = useState([])
+  const [showPlants, setShowPlants] = useState(false)
 
   const handleImageSelect = (file) => {
     setSelectedImage(file)
@@ -42,7 +60,6 @@ function AnalysisPage() {
     const url = URL.createObjectURL(file)
     setPreviewUrl(url)
 
-    // Önce base64'e çevir, sonra analizi başlat
     const reader = new FileReader()
     reader.onload = async (e) => {
       const base64 = e.target.result
@@ -88,17 +105,9 @@ function AnalysisPage() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: pos.delay, duration: 0.5 }}
           style={{
-            position: 'fixed',
-            top: pos.top,
-            left: pos.left,
-            right: pos.right,
-            fontSize: pos.size,
-            transform: `rotate(${pos.rotate}deg)`,
-            opacity: 0.07,
-            pointerEvents: 'none',
-            userSelect: 'none',
-            zIndex: 0,
-            filter: 'blur(0.5px)',
+            position: 'fixed', top: pos.top, left: pos.left, right: pos.right,
+            fontSize: pos.size, transform: `rotate(${pos.rotate}deg)`,
+            opacity: 0.07, pointerEvents: 'none', userSelect: 'none', zIndex: 0, filter: 'blur(0.5px)',
           }}
         >
           {DECO_ICONS[i % DECO_ICONS.length]}
@@ -115,56 +124,104 @@ function AnalysisPage() {
 
         <div className="analysis-grid">
           <div className="analysis-column left-column">
-            <ImageUpload
-              onImageSelect={handleImageSelect}
-              selectedImage={selectedImage}
-              loading={loading}
-            />
+            <ImageUpload onImageSelect={handleImageSelect} selectedImage={selectedImage} loading={loading} />
             {error && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                style={{
-                  marginTop: '16px', padding: '16px',
-                  background: 'rgba(239,68,68,0.06)',
-                  border: '1px solid rgba(239,68,68,0.2)',
-                  borderRadius: '12px', color: '#dc2626', fontSize: '0.875rem'
-                }}
-              >
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                style={{ marginTop: '16px', padding: '16px', background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '12px', color: '#dc2626', fontSize: '0.875rem' }}>
                 <strong>{t('error_title')}</strong> {error}
               </motion.div>
             )}
           </div>
-
           <div className="analysis-column right-column">
-            <AnalysisResult
-              result={result}
-              loading={loading}
-              previewImage={previewUrl}
-              previewBase64={previewBase64}
-            />
+            <AnalysisResult result={result} loading={loading} previewImage={previewUrl} previewBase64={previewBase64} />
           </div>
         </div>
 
-        {history.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            style={{ marginTop: '48px' }}
+        {/* DESTEKLENEn BİTKİLER PANELİ */}
+        <div style={{ marginTop: '40px' }}>
+          <button
+            onClick={() => setShowPlants(!showPlants)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              padding: '12px 24px', borderRadius: '12px', border: '1px solid rgba(22,163,74,0.2)',
+              background: showPlants ? 'rgba(22,163,74,0.08)' : 'white',
+              color: 'var(--green-700)', fontWeight: 600, fontSize: '0.9rem',
+              cursor: 'pointer', transition: 'all 0.2s ease', fontFamily: 'inherit',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+            }}
           >
-            <h2 style={{
-              fontSize: '1.1rem', fontWeight: 700,
-              color: 'var(--text-primary)', marginBottom: '16px',
-              display: 'flex', alignItems: 'center', gap: '8px'
-            }}>
+            <span>🌿 Desteklenen Bitkiler ve Hastalıklar</span>
+            <span style={{ transition: 'transform 0.3s ease', transform: showPlants ? 'rotate(180deg)' : 'rotate(0deg)', fontSize: '0.8rem' }}>▼</span>
+            <span style={{ marginLeft: 'auto', background: 'rgba(22,163,74,0.1)', color: 'var(--green-700)', borderRadius: '9999px', padding: '2px 10px', fontSize: '0.75rem', fontWeight: 700 }}>
+              14 Bitki · 38 Sınıf
+            </span>
+          </button>
+
+          <AnimatePresence>
+            {showPlants && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                style={{ overflow: 'hidden' }}
+              >
+                <div style={{
+                  marginTop: '12px', padding: '24px', background: 'white',
+                  borderRadius: '16px', border: '1px solid rgba(22,163,74,0.1)',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+                }}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                    gap: '16px',
+                  }}>
+                    {SUPPORTED_PLANTS.map((plant, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.04 }}
+                        style={{
+                          padding: '14px 16px', borderRadius: '12px',
+                          background: 'var(--slate-50)', border: '1px solid rgba(22,163,74,0.08)',
+                          transition: 'all 0.2s ease',
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(22,163,74,0.05)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'var(--slate-50)'}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '1.4rem' }}>{plant.emoji}</span>
+                          <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{plant.name}</span>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                          {plant.diseases.map((d, j) => (
+                            <span key={j} style={{
+                              fontSize: '0.68rem', padding: '2px 8px', borderRadius: '9999px',
+                              background: d === 'Sağlıklı' ? 'rgba(22,163,74,0.1)' : 'rgba(239,68,68,0.08)',
+                              color: d === 'Sağlıklı' ? 'var(--green-700)' : '#dc2626',
+                              fontWeight: 500,
+                            }}>
+                              {d}
+                            </span>
+                          ))}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* ANALİZ GEÇMİŞİ */}
+        {history.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} style={{ marginTop: '48px' }}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               🕐 Son Analizler
             </h2>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-              gap: '16px'
-            }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px' }}>
               {history.map((item, i) => (
                 <motion.div
                   key={item.id}
