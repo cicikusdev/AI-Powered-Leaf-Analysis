@@ -19,10 +19,9 @@ const handleSavePDF = async () => {
   useCORS: true,
   backgroundColor: '#ffffff',
   logging: false,
-  width: 600,
-  windowWidth: 600,
+  width: element.offsetWidth,
+  windowWidth: 1200,
 })
-
     const imgData = canvas.toDataURL('image/png')
     const pdf = new jsPDF('p', 'mm', [210, 350])
     const pdfWidth = pdf.internal.pageSize.getWidth()
