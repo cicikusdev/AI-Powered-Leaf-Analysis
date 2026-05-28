@@ -16,19 +16,45 @@ function TopPredictions({ predictions = [] }) {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: index * 0.1, duration: 0.4 }}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}
         >
-          <div className="prediction-info">
-            <span className="prediction-name">
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <span style={{
+              display: 'block',
+              fontSize: '0.78rem',
+              fontWeight: 500,
+              color: 'var(--text-primary)',
+              marginBottom: '4px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>
               {language === 'en' && pred.class_name_en ? pred.class_name_en : pred.class_name}
             </span>
-            <div className="prediction-bar-container">
-              <div
-                className="prediction-bar"
-                style={{ width: `${pred.confidence}%` }}
-              />
+            <div style={{
+              height: '6px',
+              background: 'var(--slate-100)',
+              borderRadius: '9999px',
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                height: '100%',
+                width: `${pred.confidence}%`,
+                background: 'linear-gradient(90deg, #16a34a, #059669)',
+                borderRadius: '9999px',
+              }} />
             </div>
           </div>
-          <span className="prediction-value">%{pred.confidence.toFixed(1)}</span>
+          <span style={{
+            fontSize: '0.78rem',
+            fontWeight: 600,
+            color: 'var(--text-secondary)',
+            minWidth: '42px',
+            textAlign: 'right',
+            flexShrink: 0,
+          }}>
+            %{pred.confidence.toFixed(1)}
+          </span>
         </motion.div>
       ))}
     </div>
