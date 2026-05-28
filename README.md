@@ -11,9 +11,12 @@ This project is a deep learning-based plant disease detection application. The m
 ### Features
 
 - 🔬 **Leaf Analysis:** Upload a leaf photo to detect the plant species and disease
+- ✂️ **Crop Tool:** Crop the leaf area for better accuracy
+- 💾 **PDF Export:** Save analysis results as PDF with the leaf image
+- 🕐 **Analysis History:** View last 5 analyses on the page
+- 🌙 **Dark/Light Theme:** Toggle between dark and light mode on the landing page
 - 📊 **Model Metrics:** Detailed performance metrics such as Accuracy, Precision, Recall, F1-Score, WMAPE, ROC Curve
-- 🔄 **Model Comparison:** Compare the performance of 4 different models side-by-side
-- 📈 **Visualization:** Confusion Matrix, ROC curve, training charts, and more
+- 📈 **Visualization:** Confusion Matrix, ROC curve, WMAPE chart, and more
 
 ## 🏗️ Architecture
 
@@ -25,7 +28,7 @@ This project is a deep learning-based plant disease detection application. The m
                                                │
                                     ┌──────────┴─────────┐
                                     │  Keras Models       │
-                                    │  (MobileNetV2 x4)  │
+                                    │  (MobileNetV2)      │
                                     └────────────────────┘
 ```
 
@@ -33,10 +36,10 @@ This project is a deep learning-based plant disease detection application. The m
 
 | Layer | Technology |
 |--------|-----------|
-| **Frontend** | React 19, Vite, Recharts, Framer Motion, Lucide Icons |
+| **Frontend** | React 19, Vite, Recharts, Framer Motion, Lucide Icons, html2canvas, jsPDF |
 | **Backend** | Flask, Flask-CORS |
 | **Model** | TensorFlow/Keras, MobileNetV2 (Transfer Learning) |
-| **Dataset** | PlantDoc Classification Dataset, PlantVillage Dataset (38 classes, ~54,000 images) | 
+| **Dataset** | PlantDoc Classification Dataset, PlantVillage Dataset (38 classes, ~54,000 images) |
 | **Evaluation** | scikit-learn |
 
 ## 🌱 Supported Plants and Diseases (38 Classes)
@@ -66,33 +69,24 @@ This project is a deep learning-based plant disease detection application. The m
 - Node.js 18+
 - npm 9+
 
-### 1. Backend Setup
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/cicikusdev/AI-Powered-Leaf-Analysis.git
+cd AI-Powered-Leaf-Analysis/bitki_projesi
+```
+
+### 2. Backend Setup
 
 ```bash
 cd backend
 pip install -r requirements.txt
 ```
 
-### 2. Calculating Model Metrics (First Time)
-
-Run the following script to calculate model performance metrics. This process may take a while the first time:
-
-```bash
-cd backend
-python evaluate_models.py
-```
-
-For a quick test (50 images per class):
-```bash
-python evaluate_models.py --quick
-```
-
-This command generates the `metrics_cache.json` file. Subsequent runs will read metrics from this file.
-
 ### 3. Frontend Setup
 
 ```bash
-cd backend
+cd ../frontend
 npm install
 ```
 
@@ -105,7 +99,7 @@ cd backend
 python app.py
 ```
 
-The backend runs at http://localhost:5000.
+Backend runs at http://localhost:5000.
 
 ### 2. Start Frontend
 
@@ -116,7 +110,7 @@ cd frontend
 npm run dev
 ```
 
-The frontend runs at http://localhost:5173.
+Frontend runs at http://localhost:5173.
 
 ### 3. Open in Browser
 
@@ -126,26 +120,26 @@ Go to http://localhost:5173.
 
 ### Leaf Analysis
 
-1. Upload a leaf photo to the "Drag or click to upload a leaf photo" area on the home page
-2. The application will analyze it automatically
-3. The results will be displayed on the right panel:
-   - Plant species (in English/Turkish)
+1. Click "Analizi Başlat" on the landing page
+2. Upload a leaf photo (drag & drop or click)
+3. Optionally crop the image using the scissors icon for better accuracy
+4. Results appear automatically:
+   - Plant species
    - Disease name (if any)
    - Model confidence score (%)
    - Top 5 predictions
    - Disease description and treatment recommendation
+5. Save results as PDF using the "PDF Kaydet" button
 
 ### Model Metrics
 
-Click on the "Model Metrics" tab to access detailed performance analysis:
+Click "Metrikler" in the navbar to access detailed performance analysis:
 
 - **General Metrics:** Accuracy, Precision, Recall, F1-Score, WMAPE, AUC cards
-- **Model Comparison:** Compare 4 models using bar and radar charts
-- **Training Process:** Accuracy and Loss curves
 - **Confusion Matrix:** 38×38 interactive heatmap
 - **ROC Curve:** Multi-class ROC curves and AUC values
 - **Class-based Table:** Sortable and filterable performance table
-- **Error Analysis:** Class-based error rate chart
+- **Error Analysis:** Class-based error rate chart (WMAPE)
 
 ## 🔌 API Documentation
 
@@ -161,7 +155,7 @@ Click on the "Model Metrics" tab to access detailed performance analysis:
 ### Predict API Example
 
 ```bash
-curl -X POST -F "image=@leaf.jpg" -F "model=best_model_v4" http://localhost:5000/api/predict
+curl -X POST -F "image=@leaf.jpg" -F "model=best_model_v6" http://localhost:5000/api/predict
 ```
 
 ## 📁 Project Structure
@@ -176,39 +170,20 @@ bitki_projesi/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/        # React components
-│   │   │   ├── Navbar.jsx
-│   │   │   ├── ImageUpload.jsx
-│   │   │   ├── AnalysisResult.jsx
-│   │   │   ├── ConfidenceBar.jsx
-│   │   │   ├── TopPredictions.jsx
-│   │   │   ├── MetricCards.jsx
-│   │   │   ├── ConfusionMatrix.jsx
-│   │   │   ├── RocCurve.jsx
-│   │   │   ├── TrainingChart.jsx
-│   │   │   ├── ClassMetricsTable.jsx
-│   │   │   ├── ModelComparison.jsx
-│   │   │   └── WmapeChart.jsx
 │   │   ├── pages/
+│   │   │   ├── LandingPage.jsx
 │   │   │   ├── AnalysisPage.jsx
 │   │   │   └── MetricsPage.jsx
 │   │   ├── services/
 │   │   │   └── api.js
 │   │   ├── App.jsx
 │   │   ├── App.css
-│   │   ├── index.css
-│   │   └── main.jsx
-│   ├── index.html
+│   │   └── index.css
 │   ├── package.json
 │   └── vite.config.js
-├── bitki_projesi_model/
-│   ├── best_model.keras       # Model v1
-│   ├── best_model_v2.keras    # Model v2
-│   ├── best_model_v3.keras    # Model v3
-│   ├── best_model_v4.keras    # Model v4 (default)
-│   ├── class_names.json       # 38 class labels
-│   ├── plantvillage/          # PlantVillage dataset
-│   └── archive/               # Archive dataset
-└── README.md
+└── bitki_projesi_model/
+    ├── best_model_v6.keras    # Active model (default)
+    └── class_names.json       # 38 class labels
 ```
 
 ## 🧠 Model Information
@@ -217,19 +192,19 @@ bitki_projesi/
 - **Base Model:** MobileNetV2 (transfer learning with ImageNet weights)
 - **Input Size:** 128×128 pixels, RGB
 - **Output:** 38 classes (softmax)
-- **Training:** Fine-tuning + data augmentation
+- **Training:** Fine-tuning + data augmentation (PlantVillage + PlantDoc)
 
-### Models
+### Model Versions
 
-| Model | File | Size | Description |
-|-------|-------|-------|----------|
-| v1 | `best_model.keras` | ~11 MB | Initial version |
-| v2 | `best_model_v2.keras` | ~11 MB | Hyperparameter optimization |
-| v3 | `best_model_v3.keras` | ~23 MB | Expanded architecture |
-| v4 | `best_model_v4.keras` | ~23 MB | Final version (default) |
+| Model | Val Accuracy | Description |
+|-------|-------------|----------|
+| v1 - v4 | — | Previous versions |
+| v5 | 98.00% | Further fine-tuning |
+| **v6** | **98.34%** | **Active — PlantVillage + PlantDoc** |
 
 ### Dataset
-- **PlantVillage Dataset:** 38 classes, ~630 images per class, ~54,000 images in total
+- **PlantVillage Dataset:** 38 classes, ~54,000 images
+- **PlantDoc Dataset:** Real-world field images, 28 classes mapped
 - **Train/Test Split:** 80% train, 20% test (stratified)
 
 ## 📄 License
@@ -238,10 +213,9 @@ This project was developed for educational purposes.
 
 ---
 
-*LeafScan v2.0 · MobileNetV2 + Transfer Learning · PlantVillage Dataset · 2026*
+*LeafScan v2.0 · MobileNetV2 + Transfer Learning · PlantVillage + PlantDoc Dataset · 2026*
 
---------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------
+---
 
 # 🌿 LeafScan — Bitki Hastalığı Tespiti
 
@@ -249,14 +223,17 @@ Yapay zeka destekli bitki hastalığı tespit sistemi. Yaprak fotoğrafı yükle
 
 ## 📋 Proje Hakkında
 
-Bu proje, derin öğrenme tabanlı bir bitki hastalığı tespit uygulamasıdır. MobileNetV2 mimarisi ve transfer learning kullanılarak eğitilmiş modeller, 14 farklı bitkiye ait 38 hastalık sınıfını tanıyabilmektedir.
+MobileNetV2 mimarisi ve transfer learning kullanılarak eğitilmiş modeller, 14 farklı bitkiye ait 38 hastalık sınıfını tanıyabilmektedir.
 
 ### Özellikler
 
 - 🔬 **Yaprak Analizi:** Yaprak fotoğrafı yükleyerek bitkinin türünü ve hastalığını tespit edin
-- 📊 **Model Metrikleri:** Accuracy, Precision, Recall, F1-Score, WMAPE, ROC Curve gibi detaylı performans metrikleri
-- 🔄 **Model Karşılaştırma:** 4 farklı modelin performansını yan yana karşılaştırın
-- 📈 **Görselleştirme:** Confusion Matrix, ROC eğrisi, eğitim grafikleri ve daha fazlası
+- ✂️ **Kırpma Aracı:** Daha iyi doğruluk için yaprak alanını kırpın
+- 💾 **PDF Dışa Aktarma:** Analiz sonuçlarını yaprak görseli ile birlikte PDF olarak kaydedin
+- 🕐 **Analiz Geçmişi:** Son 5 analizi sayfada görüntüleyin
+- 🌙 **Koyu/Açık Tema:** Landing page'de tema değiştirin
+- 📊 **Model Metrikleri:** Accuracy, Precision, Recall, F1-Score, WMAPE, ROC Curve
+- 📈 **Görselleştirme:** Confusion Matrix, ROC eğrisi, WMAPE grafiği
 
 ## 🏗️ Mimari
 
@@ -268,7 +245,7 @@ Bu proje, derin öğrenme tabanlı bir bitki hastalığı tespit uygulamasıdır
                                                │
                                     ┌──────────┴─────────┐
                                     │  Keras Modelleri    │
-                                    │  (MobileNetV2 x4)  │
+                                    │  (MobileNetV2)      │
                                     └────────────────────┘
 ```
 
@@ -276,10 +253,10 @@ Bu proje, derin öğrenme tabanlı bir bitki hastalığı tespit uygulamasıdır
 
 | Katman | Teknoloji |
 |--------|-----------|
-| **Frontend** | React 19, Vite, Recharts, Framer Motion, Lucide Icons |
+| **Frontend** | React 19, Vite, Recharts, Framer Motion, Lucide Icons, html2canvas, jsPDF |
 | **Backend** | Flask, Flask-CORS |
 | **Model** | TensorFlow/Keras, MobileNetV2 (Transfer Learning) |
-| **Veri Seti** | PlantDoc Classification Dataset, PlantVillage Dataset (38 sınıf, ~54.000 görüntü) | 
+| **Veri Seti** | PlantDoc Classification Dataset, PlantVillage Dataset (38 sınıf, ~54.000 görüntü) |
 | **Değerlendirme** | scikit-learn |
 
 ## 🌱 Desteklenen Bitkiler ve Hastalıklar (38 Sınıf)
@@ -309,150 +286,40 @@ Bu proje, derin öğrenme tabanlı bir bitki hastalığı tespit uygulamasıdır
 - Node.js 18+
 - npm 9+
 
-### 1. Backend Kurulumu
+### 1. Repoyu Klonla
+
+```bash
+git clone https://github.com/cicikusdev/AI-Powered-Leaf-Analysis.git
+cd AI-Powered-Leaf-Analysis/bitki_projesi
+```
+
+### 2. Backend Kurulumu
 
 ```bash
 cd backend
 pip install -r requirements.txt
 ```
 
-### 2. Model Metriklerini Hesaplama (İlk Kez)
-
-Model performans metriklerini hesaplamak için aşağıdaki scripti çalıştırın. Bu işlem ilk seferde biraz sürebilir:
-
-```bash
-cd backend
-python evaluate_models.py
-```
-
-Hızlı test için (sınıf başına 50 görüntü):
-```bash
-python evaluate_models.py --quick
-```
-
-Bu komut `metrics_cache.json` dosyası oluşturur. Sonraki çalıştırmalarda bu dosyadan metrikler okunur.
-
 ### 3. Frontend Kurulumu
 
 ```bash
-cd frontend
+cd ../frontend
 npm install
 ```
 
 ## ▶️ Çalıştırma
 
-### 1. Backend'i Başlat
-
 ```bash
+# Terminal 1 - Backend
 cd backend
 python app.py
-```
 
-Backend http://localhost:5000 adresinde çalışır.
-
-### 2. Frontend'i Başlat
-
-Yeni bir terminal açın:
-
-```bash
+# Terminal 2 - Frontend
 cd frontend
 npm run dev
 ```
 
-Frontend http://localhost:5173 adresinde çalışır.
-
-### 3. Tarayıcıda Aç
-
-http://localhost:5173 adresine gidin.
-
-## 📖 Kullanım
-
-### Yaprak Analizi
-
-1. Ana sayfada "Yaprak fotoğrafı sürükleyin veya tıklayın" alanına bir yaprak fotoğrafı yükleyin
-2. Uygulama otomatik olarak analiz eder
-3. Sonuçlar sağ panelde görüntülenir:
-   - Bitkinin türü (Türkçe)
-   - Hastalık adı (varsa)
-   - Model güven skoru (%)
-   - En yüksek 5 tahmin
-   - Hastalık açıklaması ve tedavi önerisi
-
-### Model Metrikleri
-
-"Model Metrikleri" sekmesine tıklayarak detaylı performans analizine erişin:
-
-- **Genel Metrikler:** Accuracy, Precision, Recall, F1-Score, WMAPE, AUC kartları
-- **Model Karşılaştırma:** 4 modelin performansını bar chart ve radar chart ile karşılaştırma
-- **Eğitim Süreci:** Accuracy ve Loss eğrileri
-- **Karışıklık Matrisi:** 38×38 interaktif heatmap
-- **ROC Eğrisi:** Multi-class ROC eğrileri ve AUC değerleri
-- **Sınıf Bazlı Tablo:** Sıralanabilir ve filtrelenebilir performans tablosu
-- **Hata Analizi:** Sınıf bazlı hata oranı grafiği
-
-## 🔌 API Dokümantasyonu
-
-| Endpoint | Method | Açıklama |
-|----------|--------|----------|
-| `/api/health` | GET | Sağlık kontrolü |
-| `/api/predict` | POST | Görüntü yükle → tahmin al |
-| `/api/classes` | GET | Desteklenen sınıf listesi |
-| `/api/models` | GET | Mevcut model listesi |
-| `/api/metrics` | GET | Tüm modellerin metrikleri |
-| `/api/metrics/<model>` | GET | Tek model metrikleri |
-
-### Predict API Örneği
-
-```bash
-curl -X POST -F "image=@yaprak.jpg" -F "model=best_model_v4" http://localhost:5000/api/predict
-```
-
-## 📁 Proje Yapısı
-
-```text
-bitki_projesi/
-├── backend/
-│   ├── app.py                 # Flask API sunucusu
-│   ├── evaluate_models.py     # Model değerlendirme scripti
-│   ├── requirements.txt       # Python bağımlılıkları
-│   └── metrics_cache.json     # Hesaplanmış metrikler (otomatik oluşur)
-├── frontend/
-│   ├── src/
-│   │   ├── components/        # React bileşenleri
-│   │   │   ├── Navbar.jsx
-│   │   │   ├── ImageUpload.jsx
-│   │   │   ├── AnalysisResult.jsx
-│   │   │   ├── ConfidenceBar.jsx
-│   │   │   ├── TopPredictions.jsx
-│   │   │   ├── MetricCards.jsx
-│   │   │   ├── ConfusionMatrix.jsx
-│   │   │   ├── RocCurve.jsx
-│   │   │   ├── TrainingChart.jsx
-│   │   │   ├── ClassMetricsTable.jsx
-│   │   │   ├── ModelComparison.jsx
-│   │   │   └── WmapeChart.jsx
-│   │   ├── pages/
-│   │   │   ├── AnalysisPage.jsx
-│   │   │   └── MetricsPage.jsx
-│   │   ├── services/
-│   │   │   └── api.js
-│   │   ├── App.jsx
-│   │   ├── App.css
-│   │   ├── index.css
-│   │   └── main.jsx
-│   ├── index.html
-│   ├── package.json
-│   └── vite.config.js
-├── bitki_projesi_model/
-│   ├── best_model.keras       # Model v1
-│   ├── best_model_v2.keras    # Model v2
-│   ├── best_model_v3.keras    # Model v3
-│   ├── best_model_v4.keras    # Model v4 (varsayılan)
-│   ├── class_names.json       # 38 sınıf etiketleri
-│   ├── plantvillage/          # PlantVillage veri seti
-│   └── archive/               # Archive veri seti
-└── README.md
-```
+Tarayıcıda http://localhost:5173 adresine gidin.
 
 ## 🧠 Model Bilgileri
 
@@ -460,19 +327,19 @@ bitki_projesi/
 - **Temel Model:** MobileNetV2 (ImageNet ağırlıkları ile transfer learning)
 - **Giriş Boyutu:** 128×128 piksel, RGB
 - **Çıkış:** 38 sınıf (softmax)
-- **Eğitim:** Fine-tuning + data augmentation
+- **Eğitim:** Fine-tuning + data augmentation (PlantVillage + PlantDoc)
 
-### Modeller
+### Model Versiyonları
 
-| Model | Dosya | Boyut | Açıklama |
-|-------|-------|-------|----------|
-| v1 | `best_model.keras` | ~11 MB | İlk versiyon |
-| v2 | `best_model_v2.keras` | ~11 MB | Hiperparametre optimizasyonu |
-| v3 | `best_model_v3.keras` | ~23 MB | Genişletilmiş mimari |
-| v4 | `best_model_v4.keras` | ~23 MB | Son versiyon (varsayılan) |
+| Model | Val Accuracy | Açıklama |
+|-------|-------------|----------|
+| v1 - v4 | — | Önceki versiyonlar |
+| v5 | 98.00% | Fine-tuning |
+| **v6** | **98.34%** | **Aktif — PlantVillage + PlantDoc** |
 
 ### Veri Seti
-- **PlantVillage Dataset:** 38 sınıf, sınıf başına ~630 görüntü, toplam ~54.000 görüntü
+- **PlantVillage Dataset:** 38 sınıf, ~54.000 görüntü
+- **PlantDoc Dataset:** Gerçek tarla görselleri, 28 sınıf eşleştirildi
 - **Eğitim/Test Ayrımı:** %80 eğitim, %20 test (stratified)
 
 ## 📄 Lisans
@@ -481,4 +348,4 @@ Bu proje eğitim amaçlı geliştirilmiştir.
 
 ---
 
-*LeafScan v2.0 · MobileNetV2 + Transfer Learning · PlantVillage Dataset · 2026*
+*LeafScan v2.0 · MobileNetV2 + Transfer Learning · PlantVillage + PlantDoc Dataset · 2026*
