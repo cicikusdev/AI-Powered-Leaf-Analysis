@@ -15,11 +15,13 @@ const handleSavePDF = async () => {
   try {
     const element = resultRef.current
     const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-    })
+  scale: 2,
+  useCORS: true,
+  backgroundColor: '#ffffff',
+  logging: false,
+  width: 600,
+  windowWidth: 600,
+})
 
     const imgData = canvas.toDataURL('image/png')
     const pdf = new jsPDF('p', 'mm', [210, 350])
