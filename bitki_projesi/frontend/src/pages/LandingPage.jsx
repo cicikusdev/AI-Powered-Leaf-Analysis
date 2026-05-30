@@ -7,7 +7,7 @@ const features = [
   {
     icon: '🔬',
     title: 'Derin Öğrenme',
-    desc: 'MobileNetV2 mimarisi ve transfer learning ile %98 doğrulukla hastalık tespiti.',
+    desc: 'MobileNetV2 mimarisi ve transfer learning ile %94 doğrulukla hastalık tespiti.',
     color: '#16a34a',
   },
   {
@@ -38,7 +38,7 @@ const steps = [
 ]
 
 const stats = [
-  { value: '%98', label: 'Model Doğruluğu' },
+  { value: '%94', label: 'Model Doğruluğu' },
   { value: '38', label: 'Hastalık Sınıfı' },
   { value: '14', label: 'Bitki Türü' },
   { value: '54K+', label: 'Eğitim Görseli' },
@@ -84,7 +84,7 @@ export default function LandingPage() {
           >
             <div className="lp-pill">
               <span className="lp-pill-dot" />
-              Yapay Zeka Destekli · %98 Doğruluk
+              Yapay Zeka Destekli · %94 Doğruluk
             </div>
 
             <h1 className="lp-hero-title">
